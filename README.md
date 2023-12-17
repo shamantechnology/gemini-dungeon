@@ -7,4 +7,4 @@ Using Dungeon and Dragons 5E as a base, we have decided to experment with RAG an
 
 ## Will you survive Gemini Maze?
 
-![Drag Racing](public/maze_idea.jpg)
+![Maze Idea](./public/maze_idea.jpg)
