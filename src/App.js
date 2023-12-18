@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import MazeIdea from "./maze_idea.png";
 import AIDMPP from "./dm_ai.png";
 import {
     Container,
@@ -127,7 +126,7 @@ function App() {
         <Container fluid={true}>
             <Row>
                 <Col xs={6} className="dungeon-view">
-                    <img src={MazeIdea} />
+                    <img src="maze_idea.png" />
                 </Col>
                 <Col xs={6} className="chatbox-container">
                     <div id="chatbox">
