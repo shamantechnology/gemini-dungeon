@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import AIDMPP from "./dm_ai.png";
+import LOADINGIF from './loading.gif';
 import {
     Container,
     Row,
@@ -10,6 +11,8 @@ import { faPaperPlane } from '@fortawesome/free-solid-svg-icons'
 
 function App() {
     let [chatHistory, setChatHistory] = useState([]);
+    let [viewPNG, setViewPNG] = useState(<img src={LOADINGIF} className="loading-gif" />);
+    let init_called = false;
 
     // add message to chat
     const addMsg = (content, type) => {
@@ -51,8 +54,6 @@ function App() {
                 </div>
             );
         }
-
-        console.log(new_msg_dom);
         setChatHistory(context => [...context, new_msg_dom]);
     }
 
@@ -62,18 +63,17 @@ function App() {
         evt.preventDefault();
         let usermsg_ta = document.getElementById("user-msg-content");
         let usermsg = usermsg_ta.value;
+        usermsg_ta.value = "";
 
         addMsg(usermsg, "user");
         addMsg("", "ai_processing");
 
         evt.target.setAttribute("disabled", true);
 
-        // call rag endpoint via post
-        let ragURL = process.env.NEXT_PUBLIC_MCAI_API_URL + "/rag";
-        console.log(ragURL);
+        // call gemini dungeon endpoint via post
+        let ragURL = process.env.REACT_APP_GD_API_URL + "/run";
 
         try {
-
             let resp = await fetch(ragURL, {
                 method: "POST", // *GET, POST, PUT, DELETE, etc.
                 mode: "cors", // no-cors, *cors, same-origin
@@ -94,6 +94,11 @@ function App() {
             let aityping = document.getElementById("ai-typing");
             aityping.remove();
             addMsg(respJSON["ai"], "ai");
+            console.log(respJSON["vision"])
+            setViewPNG(
+                <img className="ai-view" src={`data:image/png;base64,${respJSON["vision"]}`} />
+            );
+
             //evt.target.setAttribute("disabled", false);
             evt.target.removeAttribute("disabled");
         } catch (error) {
@@ -102,37 +107,63 @@ function App() {
     }
 
     useEffect(() => {
-        setChatHistory([(
-            <div className="ai-chat-container" key={0}>
-                <div className="profile-picture">
-                    <img
-                        src={AIDMPP}
-                        className="ai-avatar"
-                        alt="ai avatar"
-                    />
-                </div>
-                <div className="message">
-                    <p>
-                        Hello Adventurer!
-                        <br />
-                        Welcome to the Gemini Maze
-                    </p>
-                </div>
-            </div>
-        )]);
+        
+
+        const start_dm = async (init_called) => {
+            if (chatHistory.length == 0 && init_called === false) {
+                init_called = true;
+                // call gemini dungeon endpoint via post
+                let ragURL = process.env.REACT_APP_GD_API_URL + "/dmstart";
+
+                try {
+                    let resp = await fetch(ragURL, {
+                        method: "POST", // *GET, POST, PUT, DELETE, etc.
+                        mode: "cors", // no-cors, *cors, same-origin
+                        cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+                        credentials: "same-origin", // include, *same-origin, omit
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        redirect: "follow", // manual, *follow, error
+                        referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                    });
+
+                    let respJSON = await resp.json();
+                    addMsg(respJSON["ai"], "ai");
+                    setViewPNG(
+                        <img className="ai-view" src={`data:image/png;base64,${respJSON["vision"]}`} />
+                    );
+                } catch (error) {
+                    console.error("rag error: ", error);
+                }
+            }
+
+            return init_called;
+        }
+
+        init_called = start_dm(init_called);
+
+        // add submit on enter
+        // document.getElementById("user-msg-content").addEventListener("keydown", async (evt) => {
+        //     if (evt.key === "Enter" && !evt.shiftKey) {
+        //         evt.preventDefault();
+        //         await handleSubmit(evt);
+        //     }
+        // });
+
     }, []);
 
     return (
         <Container fluid={true}>
             <Row>
                 <Col xs={6} className="dungeon-view">
-                    <img src="maze_idea.png" />
+                    {viewPNG}
                 </Col>
                 <Col xs={6} className="chatbox-container">
                     <div id="chatbox">
                         {chatHistory}
                     </div>
-                    <div class="chat-input">
+                    <div className="chat-input">
                         <textarea className="form-control form-control-lg input-textarea" id="user-msg-content" placeholder="Type message"></textarea>
                         <button id="submit-msg" onClick={handleSubmit} className="btn btn-lg btn-primary">
                             <FontAwesomeIcon icon={faPaperPlane} />
