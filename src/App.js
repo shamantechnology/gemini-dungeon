@@ -61,53 +61,69 @@ function App() {
     // add message, send to api and get response
     const handleSubmit = async (evt) => {
         evt.preventDefault();
+        // autoscroll down chatbox
+        let chatbox = document.getElementById("chatbox");
+        chatbox.scrollTop = chatbox.scrollHeight;
+
         let usermsg_ta = document.getElementById("user-msg-content");
         let usermsg = usermsg_ta.value;
-        usermsg_ta.value = "";
+        if (usermsg !== "") {
+            usermsg_ta.value = "";
 
-        addMsg(usermsg, "user");
-        addMsg("", "ai_processing");
+            addMsg(usermsg, "user");
+            addMsg("", "ai_processing");
 
-        evt.target.setAttribute("disabled", true);
+            evt.target.setAttribute("disabled", true);
 
-        // call gemini dungeon endpoint via post
-        let ragURL = process.env.REACT_APP_GD_API_URL + "/run";
+            // call gemini dungeon endpoint via post
+            let ragURL = process.env.REACT_APP_GD_API_URL + "/run";
 
-        try {
-            let resp = await fetch(ragURL, {
-                method: "POST", // *GET, POST, PUT, DELETE, etc.
-                mode: "cors", // no-cors, *cors, same-origin
-                cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
-                credentials: "same-origin", // include, *same-origin, omit
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                redirect: "follow", // manual, *follow, error
-                referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-                body: JSON.stringify({
-                    "usermsg": usermsg
-                }), // body data type must match "Content-Type" header
-            });
+            try {
+                let resp = await fetch(ragURL, {
+                    method: "POST", // *GET, POST, PUT, DELETE, etc.
+                    mode: "cors", // no-cors, *cors, same-origin
+                    cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+                    credentials: "same-origin", // include, *same-origin, omit
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    redirect: "follow", // manual, *follow, error
+                    referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                    body: JSON.stringify({
+                        "usermsg": usermsg
+                    }), // body data type must match "Content-Type" header
+                });
 
-            let respJSON = await resp.json();
+                let respJSON = await resp.json();
 
-            let aityping = document.getElementById("ai-typing");
-            aityping.remove();
-            addMsg(respJSON["ai"], "ai");
-            console.log(respJSON["vision"])
-            setViewPNG(
-                <img className="ai-view" src={`data:image/png;base64,${respJSON["vision"]}`} />
-            );
+                let aityping = document.getElementById("ai-typing");
+                aityping.remove();
 
-            //evt.target.setAttribute("disabled", false);
-            evt.target.removeAttribute("disabled");
-        } catch (error) {
-            console.error("rag error: ", error);
+                if (respJSON["error"] === "") {
+                    addMsg(respJSON["ai"], "ai");
+                    setViewPNG(
+                        <img className="ai-view" src={`data:image/png;base64,${respJSON["vision"]}`} />
+                    );
+                } else {
+                    addMsg(respJSON["ai"], "ai")
+                    console.error("llm error: ", respJSON["error"])
+                }
+
+                // remove disable on send button
+                evt.target.removeAttribute("disabled");
+
+                // autoscroll down chatbox
+                let chatbox = document.getElementById("chatbox");
+                chatbox.scrollTop = chatbox.scrollHeight;
+            } catch (error) {
+                console.error("rag error: ", error);
+            }
         }
+
     }
 
     useEffect(() => {
-        
+
 
         const start_dm = async (init_called) => {
             if (chatHistory.length == 0 && init_called === false) {
@@ -129,10 +145,15 @@ function App() {
                     });
 
                     let respJSON = await resp.json();
-                    addMsg(respJSON["ai"], "ai");
-                    setViewPNG(
-                        <img className="ai-view" src={`data:image/png;base64,${respJSON["vision"]}`} />
-                    );
+                    if (respJSON["error"] === "") {
+                        addMsg(respJSON["ai"], "ai");
+                        setViewPNG(
+                            <img className="ai-view" src={`data:image/png;base64,${respJSON["vision"]}`} />
+                        );
+                    } else {
+                        addMsg(respJSON["ai"], "ai")
+                        console.error("llm error: ", respJSON["error"])
+                    }
                 } catch (error) {
                     console.error("rag error: ", error);
                 }
@@ -142,6 +163,12 @@ function App() {
         }
 
         init_called = start_dm(init_called);
+
+        // set auto scroll
+        window.setInterval(function () {
+            let chatbox = document.getElementById("chatbox");
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }, 5000);
 
         // add submit on enter
         // document.getElementById("user-msg-content").addEventListener("keydown", async (evt) => {
@@ -156,10 +183,10 @@ function App() {
     return (
         <Container fluid={true}>
             <Row>
-                <Col xs={6} className="dungeon-view">
+                <Col xs={12} sm={12} md={6} lg={6} className="dungeon-view">
                     {viewPNG}
                 </Col>
-                <Col xs={6} className="chatbox-container">
+                <Col xs={12} sm={12} md={6} lg={6} className="chatbox-container">
                     <div id="chatbox">
                         {chatHistory}
                     </div>
