@@ -54,16 +54,19 @@ function App() {
                 </div>
             );
         }
+
         setChatHistory(context => [...context, new_msg_dom]);
+
+        // autoscroll down chatbox
+        let chatbox = document.getElementById("chatbox");
+        chatbox.scrollTop = chatbox.scrollHeight;
     }
 
     // handle user chat message submit
     // add message, send to api and get response
     const handleSubmit = async (evt) => {
         evt.preventDefault();
-        // autoscroll down chatbox
-        let chatbox = document.getElementById("chatbox");
-        chatbox.scrollTop = chatbox.scrollHeight;
+        
 
         let usermsg_ta = document.getElementById("user-msg-content");
         let usermsg = usermsg_ta.value;
@@ -112,10 +115,6 @@ function App() {
 
                 // remove disable on send button
                 evt.target.removeAttribute("disabled");
-
-                // autoscroll down chatbox
-                let chatbox = document.getElementById("chatbox");
-                chatbox.scrollTop = chatbox.scrollHeight;
             } catch (error) {
                 console.error("rag error: ", error);
             }
