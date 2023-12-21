@@ -57,19 +57,18 @@ function App() {
 
         setChatHistory(context => [...context, new_msg_dom]);
 
-        // autoscroll down chatbox
-        let chatbox = document.getElementById("chatbox");
-        chatbox.scrollTop = chatbox.scrollHeight;
+        
     }
 
     // handle user chat message submit
     // add message, send to api and get response
     const handleSubmit = async (evt) => {
         evt.preventDefault();
-        
-
+        // autoscroll down chatbox
+        let chatbox = document.getElementById("chatbox");
         let usermsg_ta = document.getElementById("user-msg-content");
         let usermsg = usermsg_ta.value;
+
         if (usermsg !== "") {
             usermsg_ta.value = "";
 
@@ -77,7 +76,8 @@ function App() {
             addMsg("", "ai_processing");
 
             evt.target.setAttribute("disabled", true);
-
+            chatbox.scrollTop = chatbox.scrollHeight;
+        
             // call gemini dungeon endpoint via post
             let ragURL = process.env.REACT_APP_GD_API_URL + "/run";
 
@@ -115,6 +115,7 @@ function App() {
 
                 // remove disable on send button
                 evt.target.removeAttribute("disabled");
+                chatbox.scrollTop = chatbox.scrollHeight;
             } catch (error) {
                 console.error("rag error: ", error);
             }
@@ -168,7 +169,7 @@ function App() {
         // window.setInterval(function () {
         //     let chatbox = document.getElementById("chatbox");
         //     chatbox.scrollTop = chatbox.scrollHeight;
-        // }, 5000);
+        // }, 10000);
 
         // add submit on enter
         // document.getElementById("user-msg-content").addEventListener("keydown", async (evt) => {
