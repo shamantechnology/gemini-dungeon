@@ -17,13 +17,7 @@ body {
   background-color: #121212;
 }
 
-@media only screen and (max-width: 768px) {
 
-  .chatbox-container,
-  .chat-container {
-    height: 80%;
-  }
-}
 
 .dungeon-view {
   background-color: black;
@@ -182,4 +176,15 @@ body {
   background-color: #2a4dfe;
   border-radius: 10px;
   border: 3px solid transparent;
+}
+
+/* mobile fixes */
+@media (max-width: 768px) {
+  .dungeon-view {
+    height: 200px;
+  }
+
+  .chatbox-container {
+    height: 460px;
+  }
 }
