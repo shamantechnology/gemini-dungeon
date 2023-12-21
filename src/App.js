@@ -166,10 +166,10 @@ function App() {
         init_called = start_dm(init_called);
 
         // set auto scroll
-        window.setInterval(function () {
-            let chatbox = document.getElementById("chatbox");
-            chatbox.scrollTop = chatbox.scrollHeight;
-        }, 5000);
+        // window.setInterval(function () {
+        //     let chatbox = document.getElementById("chatbox");
+        //     chatbox.scrollTop = chatbox.scrollHeight;
+        // }, 5000);
 
         // add submit on enter
         // document.getElementById("user-msg-content").addEventListener("keydown", async (evt) => {
