@@ -184,10 +184,10 @@ function App() {
     return (
         <Container fluid={true}>
             <Row>
-                <Col xs={12} sm={12} md={6} lg={6} className="dungeon-view">
+                <Col xs={12} sm={6} md={6} lg={6} className="dungeon-view">
                     {viewPNG}
                 </Col>
-                <Col xs={12} sm={12} md={6} lg={6} className="chatbox-container">
+                <Col xs={12} sm={6} md={6} lg={6} className="chatbox-container">
                     <div id="chatbox">
                         {chatHistory}
                     </div>
