@@ -183,11 +183,18 @@ body {
 /* portrait */
 @media (max-width: 768px) and (orientation: portrait) {
   .dungeon-view {
-    height: 200px;
+    height: 41%;
     margin-bottom: -31px;
   }
 
   .chatbox-container {
-    height: 404px;
+    height: 48%;
+  }
+}
+
+/* landscape */
+@media (max-width: 768px) and (orientation: landscape) { 
+  .chatbox-container {
+    height: 80%;
   }
 }
