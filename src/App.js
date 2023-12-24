@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import AIDMPP from "./dm_ai.png";
 import LOADINGIF from './loading.gif';
 import {
@@ -13,6 +13,7 @@ function App() {
     let [chatHistory, setChatHistory] = useState([]);
     let [viewPNG, setViewPNG] = useState(<img src={LOADINGIF} className="loading-gif" />);
     let init_called = false;
+    const chatbox = useRef("");
 
     // add message to chat
     const addMsg = (content, type) => {
@@ -60,12 +61,18 @@ function App() {
         
     }
 
+    const chatboxScrollDown = () => {
+        if(chatbox && chatbox.current) {
+            console.log("csd: ", chatbox.current.scrollTop);
+            console.log("csd: ", chatbox.current.scrollHeight);
+            chatbox.current.scrollTop = chatbox.current.scrollHeight;
+        }
+    }
+
     // handle user chat message submit
     // add message, send to api and get response
     const handleSubmit = async (evt) => {
         evt.preventDefault();
-        // autoscroll down chatbox
-        let chatbox = document.getElementById("chatbox");
         let usermsg_ta = document.getElementById("user-msg-content");
         let usermsg = usermsg_ta.value;
 
@@ -75,8 +82,10 @@ function App() {
             addMsg(usermsg, "user");
             addMsg("", "ai_processing");
 
+            // scroll down - have to wait on DOM
+            setTimeout(chatboxScrollDown, 100);
+
             evt.target.setAttribute("disabled", true);
-            chatbox.scrollTop = chatbox.scrollHeight;
         
             // call gemini dungeon endpoint via post
             let ragURL = process.env.REACT_APP_GD_API_URL + "/run";
@@ -113,13 +122,17 @@ function App() {
                     console.error("llm error: ", respJSON["error"])
                 }
 
+                // scroll down - have to wait on DOM
+                setTimeout(chatboxScrollDown, 100);
+
                 // remove disable on send button
                 evt.target.removeAttribute("disabled");
-                chatbox.scrollTop = chatbox.scrollHeight;
             } catch (error) {
                 console.error("rag error: ", error);
             }
         }
+
+        
 
     }
 
@@ -155,6 +168,9 @@ function App() {
                         addMsg(respJSON["ai"], "ai")
                         console.error("llm error: ", respJSON["error"])
                     }
+
+                    // scroll down - have to wait on DOM
+                    setTimeout(chatboxScrollDown, 100);
                 } catch (error) {
                     console.error("rag error: ", error);
                 }
@@ -188,7 +204,7 @@ function App() {
                     {viewPNG}
                 </Col>
                 <Col xs={12} sm={6} md={6} lg={6} className="chatbox-container">
-                    <div id="chatbox">
+                    <div id="chatbox" ref={chatbox}>
                         {chatHistory}
                     </div>
                     <div className="chat-input">
