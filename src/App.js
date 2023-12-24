@@ -11,8 +11,8 @@ import { faPaperPlane } from '@fortawesome/free-solid-svg-icons'
 
 function App() {
     let [chatHistory, setChatHistory] = useState([]);
-    let [viewPNG, setViewPNG] = useState(<img src={LOADINGIF} className="loading-gif" />);
-    let init_called = false;
+    let [viewPNG, setViewPNG] = useState(<img src={LOADINGIF} className="loading-gif" alt="loading..." />);
+    const init_called = useRef();
     const chatbox = useRef("");
 
     // add message to chat
@@ -114,8 +114,13 @@ function App() {
 
                 if (respJSON["error"] === "") {
                     addMsg(respJSON["ai"], "ai");
+                    const ddnow = new Date();
                     setViewPNG(
-                        <img className="ai-view" src={`data:image/png;base64,${respJSON["vision"]}`} />
+                        <img 
+                            className="ai-view"
+                            src={`data:image/png;base64,${respJSON["vision"]}`}
+                            alt={`AI vision @ ${ddnow.toLocaleString()}`}
+                        />
                     );
                 } else {
                     addMsg(respJSON["ai"], "ai")
@@ -136,50 +141,58 @@ function App() {
 
     }
 
-    useEffect(() => {
-
-
-        const start_dm = async (init_called) => {
-            if (chatHistory.length == 0 && init_called === false) {
-                init_called = true;
-                // call gemini dungeon endpoint via post
-                let ragURL = process.env.REACT_APP_GD_API_URL + "/dmstart";
-
-                try {
-                    let resp = await fetch(ragURL, {
-                        method: "POST", // *GET, POST, PUT, DELETE, etc.
-                        mode: "cors", // no-cors, *cors, same-origin
-                        cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
-                        credentials: "same-origin", // include, *same-origin, omit
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        redirect: "follow", // manual, *follow, error
-                        referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-                    });
-
-                    let respJSON = await resp.json();
-                    if (respJSON["error"] === "") {
-                        addMsg(respJSON["ai"], "ai");
-                        setViewPNG(
-                            <img className="ai-view" src={`data:image/png;base64,${respJSON["vision"]}`} />
-                        );
-                    } else {
-                        addMsg(respJSON["ai"], "ai")
-                        console.error("llm error: ", respJSON["error"])
-                    }
-
-                    // scroll down - have to wait on DOM
-                    setTimeout(chatboxScrollDown, 100);
-                } catch (error) {
-                    console.error("rag error: ", error);
-                }
-            }
-
-            return init_called;
+    const start_dm = async () => {
+        if (init_called.current) {
+            return;
         }
+        
+        if (chatHistory.length === 0) {
+            // call gemini dungeon endpoint via post
+            let ragURL = process.env.REACT_APP_GD_API_URL + "/dmstart";
 
-        init_called = start_dm(init_called);
+            try {
+                let resp = await fetch(ragURL, {
+                    method: "POST", // *GET, POST, PUT, DELETE, etc.
+                    mode: "cors", // no-cors, *cors, same-origin
+                    cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+                    credentials: "same-origin", // include, *same-origin, omit
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    redirect: "follow", // manual, *follow, error
+                    referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                });
+
+                let respJSON = await resp.json();
+                if (respJSON["error"] === "") {
+                    addMsg(respJSON["ai"], "ai");
+                    const ddnow = new Date();
+                    setViewPNG(
+                        <img
+                            className="ai-view"
+                            src={`data:image/png;base64,${respJSON["vision"]}`}
+                            alt={`AI vision @ ${ddnow.toLocaleString()}`}
+                        />
+                    );
+                } else {
+                    addMsg(respJSON["ai"], "ai")
+                    console.error("llm error: ", respJSON["error"])
+                }
+
+                // scroll down - have to wait on DOM
+                setTimeout(chatboxScrollDown, 100);
+
+                init_called.current = false;
+            } catch (error) {
+                console.error("rag error: ", error);
+            }
+        }
+    }
+
+    useEffect(() => {
+        
+
+        start_dm();
 
         // set auto scroll
         // window.setInterval(function () {
