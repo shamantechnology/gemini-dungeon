@@ -1,5 +1,5 @@
 # Gemini Maze
-## React based Front End
+## React based UI
 
 See API for more information
 
