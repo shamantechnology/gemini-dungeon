@@ -79,10 +79,8 @@ function App() {
             chatbox.scrollTop = chatbox.scrollHeight;
         
             // call gemini dungeon endpoint via post
-            let ragURL = process.env.REACT_APP_GD_API_URL + "/run";
-
             try {
-                let resp = await fetch(ragURL, {
+                let resp = await fetch("/api/run", {
                     method: "POST", // *GET, POST, PUT, DELETE, etc.
                     mode: "cors", // no-cors, *cors, same-origin
                     cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
@@ -130,10 +128,8 @@ function App() {
             if (chatHistory.length == 0 && init_called === false) {
                 init_called = true;
                 // call gemini dungeon endpoint via post
-                let ragURL = process.env.REACT_APP_GD_API_URL + "/dmstart";
-
                 try {
-                    let resp = await fetch(ragURL, {
+                    let resp = await fetch("/api/dmstart", {
                         method: "POST", // *GET, POST, PUT, DELETE, etc.
                         mode: "cors", // no-cors, *cors, same-origin
                         cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
