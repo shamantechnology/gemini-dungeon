@@ -1,36 +1,47 @@
+/*  ------ Imports  ------ */
+@import url("https://fonts.googleapis.com/css?family=VT323");
+
+/*  ------ MAIN  ------ */
 html,
 body {
   width: 100%;
   height: 100%;
+  background-image: url("../public/bg2.png");
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
-#root,
-.container-fluid,
-.chatbox-container,
-.chat-container,
-.row {
+#root {
   width: 100%;
   height: 100%
 }
 
 .container-fluid {
-  background-color: #121212;
+  height: 100vh;
+  width: 100vh;
 }
 
-
-
-.dungeon-view {
-  background-color: black;
+.view-row, .chat-row {
+  height: 50vh;
 }
 
-.dungeon-view>.loading-gif {
-  width: 100%;
+.dungeon-view, .dm-face-view {
   height: inherit;
 }
 
-.dungeon-view>.ai-view {
+.dungeon-view {
+  text-align: center;
+}
+
+.dungeon-view > .loading-gif {
+  margin-top: 50px;
+}
+
+.dungeon-view > .ai-view {
   width: 100%;
   height: 100%;
+  object-fit: contain;
+  margin-top: 5px;
 }
 
 .chat-header {
@@ -39,15 +50,35 @@ body {
 }
 
 .chatbox-container {
-  padding-top: 25px;
+  padding-top: 8px;
+  max-height: 50vh;
+
 }
 
 #chatbox {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  height: 87%;
+  height: 82%;
   overflow-y: auto;
+  background-color: rgba(42, 54, 59, 0.75);
+}
+
+.chat-input {
+  display: flex;
+  padding-top: 2px;
+}
+
+.chat-input > .form-control, .chat-input > .form-control:focus {
+  background-color: rgba(9, 37, 48, 0.8);
+  color: #ccc;
+  border: none;
+  box-shadow: none;
+  resize: none;
+}
+
+.chat-input > .form-control::placeholder {
+  color: #ccc;
 }
 
 .profile-picture>img {
@@ -89,17 +120,34 @@ body {
   margin-top: 10px;
 }
 
-.chat-input {
+.player-info {
   display: flex;
-  padding-top: 15px;
 }
 
-.chat-input > textarea {
-  width: 93%;
+.player-stats, .player-avatar {
+  width: 50%;
+  height: 100%;
 }
+
+.player-stats {
+  background-color: #333;
+  color: #fff;
+}
+
+.player-avatar > img {
+  width: 100%;
+  height: 100%;
+}
+
+
+
+/* .chat-input > textarea {
+  width: 93%;
+} */
 
 .typing {
   position: relative;
+  margin-left: 12px;
 }
 
 .typing span {
@@ -157,6 +205,89 @@ body {
   }
 }
 
+.term-container {
+  padding-top: 25px;
+}
+
+.term {
+  font: 1.6em VT323, monospace;
+  background: #000;
+  color: white;
+  text-shadow: 0 0 1em rgba(255, 255, 255, 0.25);
+  height: 100%
+}
+
+.chat-container {
+  display: block;
+  overflow-y: auto;
+  height: 10%;
+}
+
+.ai-resp, .user-resp {
+  display: block;
+}
+
+.ai-resp > p {
+  color: #4AF626;
+  margin: 0 0 10px 0;
+}
+
+.user-resp > p {
+  color: #eef;
+  margin: 0;
+  font-style: italic;
+  margin: 0 0 10px 0;
+}
+
+.input-container {
+  display: grid;
+  border-top: 1px solid #333;
+  height: 12%;
+}
+
+.user-input {
+  background: transparent;
+  border: 0px;
+  padding: 0px;
+  font-size: 0.8em;
+  color: white;
+  caret-color: #333;
+  overflow-x: hidden;
+  overflow-y: auto;
+  resize: none;
+}
+
+.user-input:focus{
+  outline: none;
+}
+
+.loading:after {
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: bottom;
+  -webkit-animation: ellipsis steps(4, end) 900ms infinite;
+  animation: ellipsis steps(4, end) 900ms infinite;
+  content: "|";
+  /* ascii code for the ellipsis character */
+  width: 0px;
+}
+
+@keyframes ellipsis {
+  to {
+    width: 40px;
+  }
+}
+
+@-webkit-keyframes ellipsis {
+  to {
+    width: 40px;
+  }
+}
+
+
+
+/* ------ scroll bar styling ------ */
+
  /* Firefox */
  * {
   scrollbar-width: auto;
@@ -178,17 +309,92 @@ body {
   border: 3px solid transparent;
 }
 
-/* mobile fixes */
+/* ------ loading gif ------ */
+.lds-grid {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin-top: 15vh;
+}
+.lds-grid div {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  animation: lds-grid 1.2s linear infinite;
+}
+.lds-grid div:nth-child(1) {
+  top: 8px;
+  left: 8px;
+  animation-delay: 0s;
+}
+.lds-grid div:nth-child(2) {
+  top: 8px;
+  left: 32px;
+  animation-delay: -0.4s;
+}
+.lds-grid div:nth-child(3) {
+  top: 8px;
+  left: 56px;
+  animation-delay: -0.8s;
+}
+.lds-grid div:nth-child(4) {
+  top: 32px;
+  left: 8px;
+  animation-delay: -0.4s;
+}
+.lds-grid div:nth-child(5) {
+  top: 32px;
+  left: 32px;
+  animation-delay: -0.8s;
+}
+.lds-grid div:nth-child(6) {
+  top: 32px;
+  left: 56px;
+  animation-delay: -1.2s;
+}
+.lds-grid div:nth-child(7) {
+  top: 56px;
+  left: 8px;
+  animation-delay: -0.8s;
+}
+.lds-grid div:nth-child(8) {
+  top: 56px;
+  left: 32px;
+  animation-delay: -1.2s;
+}
+.lds-grid div:nth-child(9) {
+  top: 56px;
+  left: 56px;
+  animation-delay: -1.6s;
+}
+@keyframes lds-grid {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+
+/* ------ mobile fixes ------ */
 
 /* portrait */
 @media (max-width: 768px) and (orientation: portrait) {
   .dungeon-view {
-    height: 41%;
-    margin-bottom: -31px;
+    height: 38vh;
+    padding-top: 20px;
   }
 
   .chatbox-container {
-    height: 48%;
+    height: 46vh;
+  }
+
+  .chat-entry > .message {
+    font-size: 10pt;
   }
 }
 

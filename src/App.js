@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import AIDMPP from "./dm_ai.png";
 import LOADINGIF from './loading.gif';
 import {
@@ -10,8 +10,23 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPaperPlane } from '@fortawesome/free-solid-svg-icons'
 
 function App() {
+    let loading_dots = (
+        <div className="lds-grid">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    );
+
     let [chatHistory, setChatHistory] = useState([]);
-    let [viewPNG, setViewPNG] = useState(<img src={LOADINGIF} className="loading-gif" />);
+    let [viewPNG, setViewPNG] = useState(loading_dots);
+    let chatboxRef = useRef(null);
     let init_called = false;
 
     // add message to chat
@@ -57,7 +72,7 @@ function App() {
 
         setChatHistory(context => [...context, new_msg_dom]);
 
-        
+
     }
 
     // handle user chat message submit
@@ -77,7 +92,7 @@ function App() {
 
             evt.target.setAttribute("disabled", true);
             chatbox.scrollTop = chatbox.scrollHeight;
-        
+
             // call gemini dungeon endpoint via post
             let ragURL = process.env.REACT_APP_GD_API_URL + "/run";
 
@@ -129,6 +144,11 @@ function App() {
         const start_dm = async (init_called) => {
             if (chatHistory.length == 0 && init_called === false) {
                 init_called = true;
+                
+                // disable submit button
+                let submitBtn = document.getElementById("submit-msg");
+                submitBtn.setAttribute("disabled", true);
+
                 // call gemini dungeon endpoint via post
 
                 let ragURL = process.env.REACT_APP_GD_API_URL + "/dmstart";
@@ -156,6 +176,9 @@ function App() {
                         addMsg(respJSON["ai"], "ai")
                         console.error("llm error: ", respJSON["error"])
                     }
+
+                    // disable submit button
+                    submitBtn.removeAttribute("disabled");
                 } catch (error) {
                     console.error("rag error: ", error);
                 }
@@ -165,6 +188,25 @@ function App() {
         }
 
         init_called = start_dm(init_called);
+
+        // add enter submit
+        // function submitOnEnter(event) {
+        //     if (event.which === 13) {
+        //         event.preventDefault(); // Prevents the addition of a new line in the text field
+        //       let div = document.createElement('div');
+        //       div.className = "user-resp";
+        //       let p = document.createElement('p');
+        //       p.innerHTML = event.target.value;
+        //       div.appendChild(p);
+              
+        //       let chatbox = document.getElementById("chatbox");
+        //       chatbox.appendChild(div);
+              
+        //       event.target.value = "";
+        //     }
+        // }
+        
+        // document.getElementById("usermsg").addEventListener("keydown", submitOnEnter);
 
         // set auto scroll
         // window.setInterval(function () {
@@ -182,23 +224,66 @@ function App() {
 
     }, []);
 
+    useEffect(() => {
+        console.log("scrollintoview for chatboxref called");
+        chatboxRef.current.scrollIntoView(false);
+
+        chatboxRef.current.scrollTop = chatboxRef.current.scrollHeight;
+
+    }, [chatHistory]);
+
     return (
         <Container fluid={true}>
-            <Row>
-                <Col xs={12} sm={6} md={6} lg={6} className="dungeon-view">
+            <Row className="view-row">
+                <Col xs={6} className="dungeon-view">
                     {viewPNG}
                 </Col>
-                <Col xs={12} sm={6} md={6} lg={6} className="chatbox-container">
-                    <div id="chatbox">
+                <Col xs={6} className="player-info">
+                    <div className="player-stats">
+                        <ul>
+                            <li>Player</li>
+                            <li>Str</li>
+                            <li>Dex</li>
+                        </ul>
+                    </div>
+                    <div className="player-avatar">
+                        <img src={AIDMPP} alt="player avatar" />
+                    </div>                    
+                </Col>
+            </Row>
+            <Row className="chat-row">
+                <Col xs={12} className="chatbox-container">
+                    <div id="chatbox" ref={chatboxRef}>
                         {chatHistory}
                     </div>
                     <div className="chat-input">
-                        <textarea className="form-control form-control-lg input-textarea" id="user-msg-content" placeholder="Type message"></textarea>
-                        <button id="submit-msg" onClick={handleSubmit} className="btn btn-lg btn-primary">
+                        <textarea className="form-control form-control-lg" id="user-msg-content" placeholder="Type message"></textarea>
+                        <button id="submit-msg" onClick={handleSubmit} className="btn btn-lg btn-dark">
                             <FontAwesomeIcon icon={faPaperPlane} />
                         </button>
                     </div>
                 </Col>
+                {/* <Col xs={12} className="term-container">
+                    <div class="term">
+                        <div class="chat-container" id="chatbox">
+                            <div class="ai-resp">
+                                <p>
+                                    Hello, what is your name?
+                                </p>
+                            </div>
+                            <div class="user-resp">
+                                <p>
+                                    John
+                                </p>
+                            </div>
+                            <div class="loading"></div>
+                        </div>
+
+                        <div class="input-container">
+                            <textarea class="user-input" id="usermsg"></textarea>
+                        </div>
+                    </div>
+                </Col> */}
             </Row>
         </Container>
     );
