@@ -219,6 +219,8 @@ function App() {
                     // player stats
                     setPlayerStats(respJSON["player_stats"]);
 
+                    initCalled.current = false;
+
                     // disable submit button
                     submitBtn.removeAttribute("disabled");
                 } catch (error) {
