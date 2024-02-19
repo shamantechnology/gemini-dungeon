@@ -27,6 +27,7 @@ function App() {
     let [chatHistory, setChatHistory] = useState([]);
     let [viewPNG, setViewPNG] = useState(loading_dots);
     let [playerStats, setPlayerStats] = useState({});
+    // let [sessionId, setSessionId] = useState("");
 
     let chatboxRef = useRef(null);
     // let mapCanvasRef = useRef(null);
@@ -123,10 +124,10 @@ function App() {
                 chatbox.scrollTop = chatbox.scrollHeight;
 
                 // call gemini dungeon endpoint via post
-                let ragURL = process.env.REACT_APP_GD_API_URL + "/run";
+                let runURL = process.env.REACT_APP_GD_API_URL + "/run";
 
                 try {
-                    let resp = await fetch(ragURL, {
+                    let resp = await fetch(runURL, {
                         method: "POST", // *GET, POST, PUT, DELETE, etc.
                         mode: "cors", // no-cors, *cors, same-origin
                         cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
@@ -138,7 +139,8 @@ function App() {
                         redirect: "follow", // manual, *follow, error
                         referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
                         body: JSON.stringify({
-                            "usermsg": usermsg
+                            "usermsg": usermsg,
+                            "session_id": localStorage.getItem("gdmsess")
                         }), // body data type must match "Content-Type" header
                     });
 
@@ -198,9 +200,9 @@ function App() {
 
                 // call gemini dungeon endpoint via post
 
-                let ragURL = process.env.REACT_APP_GD_API_URL + "/dmstart";
+                let dmstartURL = process.env.REACT_APP_GD_API_URL + "/dmstart";
                 try {
-                    let resp = await fetch(ragURL, {
+                    let resp = await fetch(dmstartURL, {
                         method: "POST", // *GET, POST, PUT, DELETE, etc.
                         mode: "cors", // no-cors, *cors, same-origin
                         cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
@@ -226,6 +228,9 @@ function App() {
 
                     // player stats
                     setPlayerStats(respJSON["player_stats"]);
+
+                    // set sessions id
+                    localStorage.setItem("gdmsess", respJSON["session_id"]);
 
                     userSubmit.current = false;
 
