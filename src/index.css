@@ -134,8 +134,10 @@ body {
   padding-top: 15px;
   border: 1px solid gold;
   max-height: 50vh;
+  height: fit-content;
   overflow-x: hidden;
   overflow-y: auto;
+  display: none;
 }
 
 .player-stats > h2 {

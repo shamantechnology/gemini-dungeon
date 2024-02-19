@@ -27,6 +27,7 @@ function App() {
     let [chatHistory, setChatHistory] = useState([]);
     let [viewPNG, setViewPNG] = useState(loading_dots);
     let [playerStats, setPlayerStats] = useState({});
+
     let chatboxRef = useRef(null);
     // let mapCanvasRef = useRef(null);
     let initCalled = useRef(false);
@@ -82,7 +83,7 @@ function App() {
         let psDOM = [];
 
         // Set the stat display order array
-        let statsOrder = ["Name", "Class", "Level", "Hit_Points", "Race", "Alignment", "Description", "Background",
+        let statsOrder = ["Name", "Class", "Level", "Hit_Points", "Race", "Gender", "Alignment", "Description", "Background",
             "Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"];
 
         // Iterate through statsOrder to ensure order
@@ -94,7 +95,6 @@ function App() {
                 </li>
             ));
         }
-
         return psDOM
     }
 
@@ -153,7 +153,12 @@ function App() {
                             <img className="ai-view" src={`data:image/png;base64,${respJSON["vision"]}`} alt="AI Vision" />
                         );
                     } else {
-                        addMsg(respJSON["ai"], "ai")
+                        if (respJSON["ai"] !== ""){
+                            addMsg(respJSON["ai"], "ai")
+                        } else {
+                            addMsg("I'm sorry I do not understand. Can you restate your message again?", "ai")
+                        }
+                        
                         console.error("llm error: ", respJSON["error"])
                     }
 
@@ -187,6 +192,9 @@ function App() {
                 // disable submit button
                 let submitBtn = document.getElementById("submit-msg");
                 submitBtn.setAttribute("disabled", true);
+
+                // get player stat to show with data
+                let playerstat_dom = document.getElementById("pstats");
 
                 // call gemini dungeon endpoint via post
 
@@ -223,6 +231,9 @@ function App() {
 
                     // disable submit button
                     submitBtn.removeAttribute("disabled");
+
+                    // show player stats
+                    playerstat_dom.style.display = "inherit";
                 } catch (error) {
                     console.error("rag error: ", error);
                 }
@@ -248,8 +259,7 @@ function App() {
                     {viewPNG}
                 </Col>
                 <Col xl={3} lg={3} className="game-info d-none d-sm-block d-sm-none d-md-block d-md-none d-lg-block">
-                    <div className="player-stats">
-                        <h2>Your Stats</h2>
+                    <div className="player-stats" id="pstats">
                         <ul>
                             {display_player_stats(playerStats)}
                         </ul>
