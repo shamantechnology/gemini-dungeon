@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { useParams } from 'react-router-dom'
 import AIDMPP from "./dm_ai.png";
 // import MAPBG from "./mapbg.png";
 import {
@@ -24,6 +25,9 @@ function App() {
         </div>
     );
 
+    // capture sessionid passed from user
+    const { userSessionID } = useParams();
+
     let [chatHistory, setChatHistory] = useState([]);
     let [viewPNG, setViewPNG] = useState(loading_dots);
     let [playerStats, setPlayerStats] = useState({});
@@ -33,6 +37,24 @@ function App() {
     // let mapCanvasRef = useRef(null);
     let initCalled = useRef(false);
     let userSubmit = useRef(false); // checks if user submitted a message or not
+
+    // api urls
+    const dmStartURL = process.env.REACT_APP_GD_API_URL + "/dmstart";
+    const runURL = process.env.REACT_APP_GD_API_URL + "/run";
+
+    // const post data
+    const post_data = {
+        method: "POST", 
+        mode: "cors", 
+        cache: "no-cache", 
+        credentials: "same-origin", 
+        headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+        },
+        redirect: "follow",
+        referrerPolicy: "no-referrer", 
+    };
 
     // add message to chat
     const addMsg = (content, type) => {
@@ -124,25 +146,13 @@ function App() {
                 chatbox.scrollTop = chatbox.scrollHeight;
 
                 // call gemini dungeon endpoint via post
-                let runURL = process.env.REACT_APP_GD_API_URL + "/run";
-
                 try {
-                    let resp = await fetch(runURL, {
-                        method: "POST", // *GET, POST, PUT, DELETE, etc.
-                        mode: "cors", // no-cors, *cors, same-origin
-                        cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
-                        credentials: "same-origin", // include, *same-origin, omit
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Access-Control-Allow-Origin": "*"
-                        },
-                        redirect: "follow", // manual, *follow, error
-                        referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-                        body: JSON.stringify({
-                            "usermsg": usermsg,
-                            "session_id": localStorage.getItem("gdmsess")
-                        }), // body data type must match "Content-Type" header
+                    post_data.body = JSON.stringify({
+                        "usermsg": usermsg,
+                        "session_id": localStorage.getItem("gdmsess")
                     });
+
+                    let resp = await fetch(runURL, post_data);
 
                     let respJSON = await resp.json();
 
@@ -188,6 +198,7 @@ function App() {
     useEffect(() => {
         const start_dm = async () => {
             userSubmit.current = true;
+            console.log("userSessionID\n", userSessionID)
             if (chatHistory.length === 0 && initCalled.current === false) {
                 initCalled.current = true;
 
@@ -199,31 +210,36 @@ function App() {
                 let playerstat_dom = document.getElementById("pstats");
 
                 // call gemini dungeon endpoint via post
-
-                let dmstartURL = process.env.REACT_APP_GD_API_URL + "/dmstart";
-                try {
-                    let resp = await fetch(dmstartURL, {
-                        method: "POST", // *GET, POST, PUT, DELETE, etc.
-                        mode: "cors", // no-cors, *cors, same-origin
-                        cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
-                        credentials: "same-origin", // include, *same-origin, omit
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Access-Control-Allow-Origin": "*"
-                        },
-                        redirect: "follow", // manual, *follow, error
-                        referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                let apiURL;
+                if (userSessionID === undefined) {
+                    apiURL = dmStartURL;
+                } else {
+                    apiURL = runURL;
+                    post_data.body = JSON.stringify({
+                        "usermsg": "I have reloaded my game save. Please continue from the last message",
+                        "session_id": userSessionID
                     });
+                }
+                
+                try {
+                    let resp = await fetch(apiURL, post_data);
 
                     let respJSON = await resp.json();
+                    if(resp.status === 400) {
+                        console.log(respJSON["error"], respJSON["type"]);
+                        if(respJSON["type"] === 0) {
+                            window.location.href = "/";
+                        }
+                    }
+
                     if (respJSON["error"] === "") {
                         addMsg(respJSON["ai"], "ai");
                         setViewPNG(
                             <img className="ai-view" src={`data:image/png;base64,${respJSON["vision"]}`} alt="AI ViSion" />
                         );
                     } else {
-                        addMsg(respJSON["ai"], "ai")
-                        console.error("llm error: ", respJSON["error"])
+                        addMsg(respJSON["ai"], "ai");
+                        console.error("llm error: ", respJSON["error"]);
                     }
 
                     // player stats
@@ -242,6 +258,8 @@ function App() {
                 } catch (error) {
                     console.error("rag error: ", error);
                 }
+            } else if(userSessionID !== undefined) {
+
             }
         }
 
@@ -265,6 +283,10 @@ function App() {
                 </Col>
                 <Col xl={3} lg={3} className="game-info d-none d-sm-block d-sm-none d-md-block d-md-none d-lg-block">
                     <div className="player-stats" id="pstats">
+                        <div class="seContainer">
+                            <input type="text" readOnly value={localStorage.getItem("gdmsess")} title="Session ID" />
+                        </div>
+                        
                         <ul>
                             {display_player_stats(playerStats)}
                         </ul>

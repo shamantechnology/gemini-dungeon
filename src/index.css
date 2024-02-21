@@ -302,6 +302,23 @@ body {
   }
 }
 
+.seContainer {
+  text-align: center;
+  padding-bottom: 5px;
+}
+
+.seContainer > input {
+  width: 100%;
+  text-align: center;
+  background-color: transparent;
+  color: #fff;
+  font-size: 9pt;
+  border: none;
+}
+
+.seContainer > input:focus {
+  outline: none;
+}
 
 
 /* ------ scroll bar styling ------ */
