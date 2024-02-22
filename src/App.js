@@ -5,7 +5,11 @@ import AIDMPP from "./dm_ai.png";
 import {
     Container,
     Row,
-    Col
+    Col, 
+    Button,
+    Modal,
+    ModalBody,
+    ModalFooter
 } from 'reactstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPaperPlane } from '@fortawesome/free-solid-svg-icons'
@@ -28,15 +32,19 @@ function App() {
     // capture sessionid passed from user
     const { userSessionID } = useParams();
 
-    let [chatHistory, setChatHistory] = useState([]);
-    let [viewPNG, setViewPNG] = useState(loading_dots);
-    let [playerStats, setPlayerStats] = useState({});
+    const [introModal, setIntroModal] = useState(true);
+    const [chatHistory, setChatHistory] = useState([]);
+    const [viewPNG, setViewPNG] = useState(loading_dots);
+    const [playerStats, setPlayerStats] = useState({});
     // let [sessionId, setSessionId] = useState("");
 
     let chatboxRef = useRef(null);
     // let mapCanvasRef = useRef(null);
     let initCalled = useRef(false);
     let userSubmit = useRef(false); // checks if user submitted a message or not
+
+    // modal window functions
+    const imToggle = () => setIntroModal(!introModal);
 
     // api urls
     const dmStartURL = process.env.REACT_APP_GD_API_URL + "/dmstart";
@@ -277,6 +285,33 @@ function App() {
 
     return (
         <Container fluid={true}>
+            <Modal isOpen={introModal} toggle={imToggle}>
+                <ModalBody>
+                    <span className="gd-modal-title">
+                        <h2>Welcome To</h2>
+                        <h1><u>Gemini Dungeon</u></h1>
+                    </span>
+                    <p>A text and image based AI Dungeon Master game</p>
+                    <p class="gms-text"><b>Will you survive?</b></p>
+                    <p><b>News and Updates</b> <i>Updated 02/22/24</i></p>
+                    <ul>
+                        <li>Working on faster game loading, please give it 5 seconds or so to load (APIs moving internally)</li>
+                        <li>Currently working on being able to add your own character</li>
+                        <li>Item and stat management still in the works, right now stats are static</li>
+                        <li>Working on user login and saving games. Please see <a href="https://x.com/ShamanTeKLLC/status/1760189001024012572?s=20" target="_blank" rel="noreferrer">here</a> on how to load old games back manually</li>
+                    </ul>
+                    <p><b>Bugs?</b></p>
+                    <p>Please report bugs to <a href="mailto:contact@burningpixel.net" target="_blank" rel="noreferrer">contact@burningpixel.net</a> or DM <a href="https://x.com/ShamanTeKLLC/" target="_blank" rel="noreferrer">@ShamanTekLLC</a> on X</p>
+                    <p><b>Support</b></p>
+                    <p>Your support is welcomed and appreciated. If you enjoy this project please follow <a href="https://x.com/ShamanTeKLLC/" target="_blank" rel="noreferrer">@ShamanTekLLC</a> on X to keep updated.</p>
+                    <p>🍵 <a href="https://ko-fi.com/geminidungeon" target="_blank" rel="noreferrer">Buy me a kofi</a> 🍵</p>
+                </ModalBody>
+                <ModalFooter>
+                <Button color="primary" onClick={imToggle}>
+                    Play
+                </Button>
+                </ModalFooter>
+            </Modal>
             <Row className="view-row">
                 <Col xl={9} lg={9} md={12} sm={12} xs={12} className="dungeon-view">
                     {viewPNG}
