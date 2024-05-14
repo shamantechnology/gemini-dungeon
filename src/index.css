@@ -400,24 +400,52 @@ body {
 
 /* portrait */
 @media (max-width: 768px) and (orientation: portrait) {
+  html, body, #root, .container-fluid {
+    height: 100%;
+  }
+
+  .view-row, .chat-row {
+    height: auto;
+  }
+  
   .dungeon-view {
-    height: 38vh;
-    padding-top: 20px;
+    height: 40vh;
   }
 
   .chatbox-container {
-    height: 46vh;
+    height: 20vh;
   }
 
   .chat-entry > .message {
     font-size: 10pt;
   }
+
+  #chatbox {
+    height: 250px;
+  }
 }
 
 /* landscape */
-@media (max-width: 992px) and (orientation: landscape) { 
+@media (max-width: 992px) and (orientation: landscape) {
+  html, body, #root, .container-fluid {
+    height: 100%;
+    width: 100%;
+  }
+
+  html, body {
+    background-color: #000;
+  }
+
+  .view-row, .chat-row {
+    height: auto;
+  }
+
+  .dungeon-view {
+    height: 40vh;
+  }
+
   .chatbox-container {
-    height: 72%;
+    height: 20vh;
   }
 
   .profile-picture > img {
@@ -431,5 +459,9 @@ body {
 
   #user-msg-content {
     height: 20px;
+  }
+
+  #chatbox {
+    height: 80px;
   }
 }
