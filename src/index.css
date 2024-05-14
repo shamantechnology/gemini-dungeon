@@ -134,8 +134,10 @@ body {
   padding-top: 15px;
   border: 1px solid gold;
   max-height: 50vh;
+  height: fit-content;
   overflow-x: hidden;
   overflow-y: auto;
+  display: none;
 }
 
 .player-stats > h2 {
@@ -300,6 +302,55 @@ body {
   }
 }
 
+.seContainer {
+  text-align: center;
+  padding-bottom: 5px;
+}
+
+.seContainer > input {
+  width: 100%;
+  text-align: center;
+  background-color: transparent;
+  color: #fff;
+  font-size: 9pt;
+  border: none;
+}
+
+.seContainer > input:focus {
+  outline: none;
+}
+
+.modal-content {
+  background-color: rgba(9, 37, 48, 0.8) !important;
+  color: #fff !important;
+}
+
+.modal-footer {
+  border-top: 1px solid #000 !important;
+}
+
+.modal-body {
+  text-align: center;
+}
+
+.gd-modal-title {
+  font-family: "Jacquarda Bastarda 9", serif;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: 10px;
+}
+
+.gd-modal-title > h1 > u {
+  color: #2a4dfe;
+}
+
+.gms-text {
+  font-family: "Jacquarda Bastarda 9", serif;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: 5px;
+  color: red;
+}
 
 
 /* ------ scroll bar styling ------ */
