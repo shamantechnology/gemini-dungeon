@@ -12,7 +12,7 @@ import {
     ModalFooter
 } from 'reactstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPaperPlane } from '@fortawesome/free-solid-svg-icons'
+import { faPaperPlane, faInfoCircle } from '@fortawesome/free-solid-svg-icons'
 
 function App() {
     let loading_dots = (
@@ -29,14 +29,28 @@ function App() {
         </div>
     );
 
+    const backgroundImages = [
+        'bg1.png',
+        'bg4.png',
+        'bg2.png',
+        'bg3.png',
+    // Add more background image file paths as needed
+    ];
+
     // capture sessionid passed from user
     const { userSessionID } = useParams();
 
     const [introModal, setIntroModal] = useState(true);
     const [chatHistory, setChatHistory] = useState([]);
     const [viewPNG, setViewPNG] = useState(loading_dots);
-    const [playerStats, setPlayerStats] = useState({});
+    const [playerStats, setPlayerStats] = useState(null);
+    const [playerItems, setPlayerItems] = useState(null);
     // let [sessionId, setSessionId] = useState("");
+    const [isSMOpen, setIsSMOpen] = useState(false);
+
+    const toggleSideMenu = () => {
+        setIsSMOpen(!isSMOpen);
+    };
 
     let chatboxRef = useRef(null);
     // let mapCanvasRef = useRef(null);
@@ -90,7 +104,7 @@ function App() {
                         />
                     </div>
                     <div className="message">
-                        <p>{content}</p>
+                        <p dangerouslySetInnerHTML={{ __html: content }}></p>
                     </div>
                 </div>
             );
@@ -106,27 +120,6 @@ function App() {
         }
 
         setChatHistory(context => [...context, new_msg_dom]);
-    }
-
-    // display_player_stats
-    // create dom for player stats display
-    const display_player_stats = (stats) => {
-        let psDOM = [];
-
-        // Set the stat display order array
-        let statsOrder = ["Name", "Class", "Level", "Hit_Points", "Race", "Gender", "Alignment", "Description", "Background",
-            "Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"];
-
-        // Iterate through statsOrder to ensure order
-        for (let i = 0; i < statsOrder.length; i++) {
-            const key = statsOrder[i].toLowerCase();
-            psDOM.push((
-                <li key={i}>
-                    <i>{statsOrder[i]}</i>&nbsp;&nbsp;<b>&nbsp;&nbsp;{stats[key]}</b>
-                </li>
-            ));
-        }
-        return psDOM
     }
 
     // handle user chat message submit
@@ -168,10 +161,26 @@ function App() {
                     aityping.remove();
 
                     if (respJSON["error"] === "") {
-                        addMsg(respJSON["ai"], "ai");
+                        let ai_resp = respJSON["ai"];
+                        ai_resp = ai_resp.replace(/\n/g, "<br />");
+                        addMsg(ai_resp, "ai");
                         setViewPNG(
                             <img className="ai-view" src={`data:image/png;base64,${respJSON["vision"]}`} alt="AI Vision" />
                         );
+
+                        // set player stats
+                        if (respJSON["player_stats"] !== "") {
+                            if (respJSON["player_stats"] !== playerStats) {
+                                setPlayerStats(respJSON["player_stats"]);
+                            }
+                        }
+
+                        // set player items
+                        if (respJSON["player_items"] !== "") {
+                            if (respJSON["player_items"] !== playerItems) {
+                                setPlayerItems(respJSON["player_items"]);
+                            }
+                        }
                     } else {
                         if (respJSON["ai"] !== ""){
                             addMsg(respJSON["ai"], "ai")
@@ -203,6 +212,51 @@ function App() {
         }
     }
 
+    const generateStatsTable = () => {
+        if(playerStats === "" || playerStats === null) {
+            return (<></>);
+        }
+
+        // Generate table rows
+        const rows = Object.entries(playerStats).map(([key, value]) => (
+            <tr key={key}>
+            <td>{key}</td>
+            <td>{value}</td>
+            </tr>
+        ));
+
+        // Render the table
+        return (
+            <div className="nes-table-responsive">
+            <table className="nes-table is-bordered is-centered">
+                <tbody>{rows}</tbody>
+            </table>
+            </div>
+        );
+    }
+
+    const generateItemsTable = () => {
+        if(playerItems === "" || playerItems === null) {
+            return (<></>);
+        }
+
+        // Generate table rows
+        const rows = playerItems.map((item, index) => (
+            <tr key={index}>
+              <td>{item}</td>
+            </tr>
+        ));
+
+        // Render the table
+        return (
+            <div className="nes-table-responsive">
+            <table className="nes-table is-bordered is-centered">
+                <tbody>{rows}</tbody>
+            </table>
+            </div>
+        );
+    }
+
     useEffect(() => {
         const start_dm = async () => {
             userSubmit.current = true;
@@ -213,9 +267,6 @@ function App() {
                 // disable submit button
                 let submitBtn = document.getElementById("submit-msg");
                 submitBtn.setAttribute("disabled", true);
-
-                // get player stat to show with data
-                let playerstat_dom = document.getElementById("pstats");
 
                 // call gemini dungeon endpoint via post
                 let apiURL;
@@ -228,6 +279,8 @@ function App() {
                         "session_id": userSessionID
                     });
                 }
+
+                addMsg("Building the world...", "ai");
                 
                 try {
                     let resp = await fetch(apiURL, post_data);
@@ -240,19 +293,36 @@ function App() {
                         }
                     }
 
+                    // clear chat of loading message
+                    setChatHistory([]);
+
+                    let ai_resp = respJSON["ai"];
+                    ai_resp = ai_resp.replace(/\n/g, "<br />");
+                        
                     if (respJSON["error"] === "") {
-                        addMsg(respJSON["ai"], "ai");
+                        addMsg(ai_resp, "ai");
                         setViewPNG(
                             <img className="ai-view" src={`data:image/png;base64,${respJSON["vision"]}`} alt="AI ViSion" />
                         );
                     } else {
-                        addMsg(respJSON["ai"], "ai");
+                        addMsg(ai_resp, "ai");
                         console.error("llm error: ", respJSON["error"]);
                     }
 
-                    // player stats
-                    setPlayerStats(respJSON["player_stats"]);
+                    // set player stats
+                    if (respJSON["player_stats"] !== "") {
+                        if (respJSON["player_stats"] !== playerStats) {
+                            setPlayerStats(respJSON["player_stats"]);
+                        }
+                    }
 
+                    // set player items
+                    if (respJSON["player_items"] !== "") {
+                        if (respJSON["player_items"] !== playerItems) {
+                            setPlayerItems(respJSON["player_items"]);
+                        }
+                    }
+                    
                     // set sessions id
                     localStorage.setItem("gdmsess", respJSON["session_id"]);
 
@@ -260,9 +330,6 @@ function App() {
 
                     // disable submit button
                     submitBtn.removeAttribute("disabled");
-
-                    // show player stats
-                    playerstat_dom.style.display = "inherit";
                 } catch (error) {
                     console.error("rag error: ", error);
                 }
@@ -276,6 +343,15 @@ function App() {
         // add enter submit
         document.getElementById("user-msg-content").addEventListener("keydown", handleSubmitOnEnter);
 
+        const randomIndex = Math.floor(Math.random() * backgroundImages.length);
+        const selectedBackground = backgroundImages[randomIndex];
+    
+        const rootElement = document.getElementById('root');
+        rootElement.style.backgroundImage = `url(${selectedBackground})`;
+        rootElement.style.backgroundRepeat = 'no-repeat';
+        rootElement.style.backgroundSize = 'cover';
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -292,7 +368,7 @@ function App() {
                         <h1><u>Gemini Dungeon</u></h1>
                     </span>
                     <p>A text and image based AI Dungeon Master game</p>
-                    <p class="gms-text"><b>Will you survive?</b></p>
+                    <p className="gms-text"><b>Will you survive?</b></p>
                     <p><b>News and Updates</b> <i>Updated 02/22/24</i></p>
                     <ul>
                         <li>Working on faster game loading, please give it 5 seconds or so to load (APIs moving internally)</li>
@@ -312,24 +388,37 @@ function App() {
                 </Button>
                 </ModalFooter>
             </Modal>
-            <Row className="view-row">
-                <Col xl={9} lg={9} md={12} sm={12} xs={12} className="dungeon-view">
-                    {viewPNG}
-                </Col>
-                <Col xl={3} lg={3} className="game-info d-none d-sm-block d-sm-none d-md-block d-md-none d-lg-block">
-                    <div className="player-stats" id="pstats">
-                        <div class="seContainer">
-                            <input type="text" readOnly value={localStorage.getItem("gdmsess")} title="Session ID" />
+            <div className="side-menu-container">
+                <div className={`side-menu ${isSMOpen ? 'open' : ''}`}>
+                    <button
+                        className={`toggle-button ${isSMOpen ? 'open' : ''}`}
+                        onClick={toggleSideMenu}
+                    >
+                        <FontAwesomeIcon icon={faInfoCircle} />
+                    </button>
+                    
+                    <div className="menu-content">
+                        <div className="menu-content">
+                            <div className="seContainer nes-container is-rounded is-dark with-title">
+                                <p className="title">Session ID</p>
+                                <p>{localStorage.getItem("gdmsess")}</p>
+                            </div>
+                            <span className="content-title">Stats</span>
+                            {generateStatsTable(playerStats)}
+                            <span className="content-title">Items</span>
+                            {generateItemsTable(playerItems)}
                         </div>
-                        
-                        <ul>
-                            {display_player_stats(playerStats)}
-                        </ul>
                     </div>
+                </div>
+            </div>
+            <Row className="view-row">
+                <Col xs={12} className="dungeon-view">
+                    {viewPNG}
                 </Col>
             </Row>
             <Row className="chat-row">
                 <Col xs={12} className="chatbox-container">
+                    
                     <div id="chatbox" ref={chatboxRef}>
                         {chatHistory}
                     </div>
@@ -340,27 +429,6 @@ function App() {
                         </button>
                     </div>
                 </Col>
-                {/* <Col xs={12} className="term-container">
-                    <div class="term">
-                        <div class="chat-container" id="chatbox">
-                            <div class="ai-resp">
-                                <p>
-                                    Hello, what is your name?
-                                </p>
-                            </div>
-                            <div class="user-resp">
-                                <p>
-                                    John
-                                </p>
-                            </div>
-                            <div class="loading"></div>
-                        </div>
-
-                        <div class="input-container">
-                            <textarea class="user-input" id="usermsg"></textarea>
-                        </div>
-                    </div>
-                </Col> */}
             </Row>
         </Container>
     );

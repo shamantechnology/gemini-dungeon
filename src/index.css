@@ -6,14 +6,14 @@ html,
 body {
   width: 100%;
   height: 100%;
-  background-image: url("../public/bg2.png");
-  background-repeat: no-repeat;
-  background-size: cover;
 }
 
 #root {
   width: 100%;
-  height: 100%
+  height: 100%;
+  /* background-image: url("../public/bg3.png");
+  background-repeat: no-repeat;
+  background-size: cover; */
 }
 
 .container-fluid {
@@ -38,10 +38,12 @@ body {
 }
 
 .dungeon-view > .ai-view {
-  width: 100%;
+  width: 80%;
   height: 100%;
-  object-fit: contain;
+  object-fit: fill;
   margin-top: 5px;
+  border: 4px dashed rgba(122, 122, 122, 0.75);
+  aspect-ratio: 16 / 9;
 }
 
 .chat-header {
@@ -90,7 +92,7 @@ body {
 .ai-chat-container {
   display: flex;
   align-self: flex-start;
-  background-color: #15202B;
+  background-color: #121212;
   color: #fff;
   padding: 5px;
   border-radius: 25px;
@@ -114,6 +116,20 @@ body {
   opacity: 83%;
   padding: 5px 11px 0px 11px;
 }
+
+#user-msg-content,
+.ai-chat-container>.message,
+.user-chat-container>.message,
+.side-menu-container {
+  font-family: "Press Start 2P", system-ui;
+  font-style: normal;
+  font-size: 9.8pt;
+  line-height: 23px;
+}
+
+/* .ai-chat-container>.message {
+  font-style: italic;
+} */
 
 .chat-entry {
   margin-bottom: 10px;
@@ -303,22 +319,26 @@ body {
 }
 
 .seContainer {
-  text-align: center;
+  /* text-align: center;
   padding-bottom: 5px;
+  display: flex;
+  flex-wrap: nowrap;
+  font-size: 9pt;
+  color: #fff; */
+
+  word-break: break-all;
 }
 
-.seContainer > input {
+/* .seContainer > input {
   width: 100%;
   text-align: center;
   background-color: transparent;
-  color: #fff;
-  font-size: 9pt;
   border: none;
 }
 
 .seContainer > input:focus {
   outline: none;
-}
+} */
 
 .modal-content {
   background-color: rgba(9, 37, 48, 0.8) !important;
@@ -515,4 +535,67 @@ body {
   #chatbox {
     height: 80px;
   }
+}
+
+/* side menu */
+.side-menu-container {
+  position: relative;
+  font-size: 7pt;
+}
+
+.toggle-button {
+  position: fixed;
+  top: 20px;
+  left: 0px;
+  background-color: rgba(42, 54, 59, 0.75);
+  border: none;
+  cursor: pointer;
+  font-size: 24px;
+  padding: 8px;
+  z-index: 100;
+  transition: left 0.3s ease-in-out;
+}
+
+.toggle-button > svg {
+  color: #fff
+}
+
+.toggle-button.open {
+  left: 300px;
+}
+
+.side-menu {
+  position: fixed;
+  top: 0;
+  left: -300px;
+  width: 300px;
+  height: 100vh;
+  background-color: rgba(42, 54, 59, 0.75);
+  transition: left 0.3s ease-in-out;
+  z-index: 99;
+  overflow: auto;
+}
+
+.side-menu.open {
+  left: 0;
+}
+
+.menu-content {
+  padding: 10px 2px;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.side-menu.open .menu-content {
+  opacity: 1;
+  transition-delay: 0.3s;
+}
+
+.menu-content > .content-title {
+  color: rgb(255, 89, 89);
+  font-weight: bold;
+  margin-top: 11px;
+  padding-bottom: 11px;
+  display: block;
+  text-align: center;
 }
