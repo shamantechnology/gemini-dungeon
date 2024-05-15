@@ -44,7 +44,7 @@ function App() {
     const [chatHistory, setChatHistory] = useState([]);
     const [viewPNG, setViewPNG] = useState(loading_dots);
     const [playerStats, setPlayerStats] = useState(null);
-    const [playerItems, setPlayerItems] = useState(null);
+    const [playerItems, setPlayerItems] = useState(["No Items"]);
     // let [sessionId, setSessionId] = useState("");
     const [isSMOpen, setIsSMOpen] = useState(false);
 
