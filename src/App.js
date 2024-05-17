@@ -5,7 +5,7 @@ import AIDMPP from "./dm_ai.png";
 import {
     Container,
     Row,
-    Col, 
+    Col,
     Button,
     Modal,
     ModalBody,
@@ -15,6 +15,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPaperPlane, faInfoCircle } from '@fortawesome/free-solid-svg-icons'
 
 function App() {
+    // variables
     let loading_dots = (
         <div className="lds-grid">
             <div></div>
@@ -34,12 +35,11 @@ function App() {
         'bg4.png',
         'bg2.png',
         'bg3.png',
-    // Add more background image file paths as needed
+        // Add more background image file paths as needed
     ];
 
-    // capture sessionid passed from user
+    // state variables
     const { userSessionID } = useParams();
-
     const [introModal, setIntroModal] = useState(true);
     const [chatHistory, setChatHistory] = useState([]);
     const [viewPNG, setViewPNG] = useState(loading_dots);
@@ -47,11 +47,15 @@ function App() {
     const [playerItems, setPlayerItems] = useState(["No Items"]);
     // let [sessionId, setSessionId] = useState("");
     const [isSMOpen, setIsSMOpen] = useState(false);
-
     const toggleSideMenu = () => {
         setIsSMOpen(!isSMOpen);
     };
+    const [selectedModel, setSelectedModel] = useState('gpt-4o');
+    const handleModelChange = (event) => {
+        setSelectedModel(event.target.value);
+    };
 
+    // ref variables
     let chatboxRef = useRef(null);
     // let mapCanvasRef = useRef(null);
     let initCalled = useRef(false);
@@ -66,16 +70,16 @@ function App() {
 
     // const post data
     const post_data = {
-        method: "POST", 
-        mode: "cors", 
-        cache: "no-cache", 
-        credentials: "same-origin", 
+        method: "POST",
+        mode: "cors",
+        cache: "no-cache",
+        credentials: "same-origin",
         headers: {
             "Content-Type": "application/json",
             "Access-Control-Allow-Origin": "*"
         },
         redirect: "follow",
-        referrerPolicy: "no-referrer", 
+        referrerPolicy: "no-referrer",
     };
 
     // add message to chat
@@ -127,7 +131,7 @@ function App() {
     const handleSubmit = async (evt) => {
         evt.preventDefault();
 
-        if(userSubmit.current === false) {
+        if (userSubmit.current === false) {
             let submitBtn = document.getElementById("submit-msg");
             let chatbox = document.getElementById("chatbox");
             let usermsg_ta = document.getElementById("user-msg-content");
@@ -182,12 +186,12 @@ function App() {
                             }
                         }
                     } else {
-                        if (respJSON["ai"] !== ""){
+                        if (respJSON["ai"] !== "") {
                             addMsg(respJSON["ai"], "ai")
                         } else {
                             addMsg("I'm sorry I do not understand. Can you restate your message again?", "ai")
                         }
-                        
+
                         console.error("llm error: ", respJSON["error"])
                     }
 
@@ -205,7 +209,7 @@ function App() {
     }
 
     const handleSubmitOnEnter = (evt) => {
-        if(userSubmit.current === false) {
+        if (userSubmit.current === false) {
             if (evt.key === "Enter" && !evt.shiftKey) {
                 handleSubmit(evt);
             }
@@ -213,46 +217,46 @@ function App() {
     }
 
     const generateStatsTable = () => {
-        if(playerStats === "" || playerStats === null) {
+        if (playerStats === "" || playerStats === null) {
             return (<></>);
         }
 
         // Generate table rows
         const rows = Object.entries(playerStats).map(([key, value]) => (
             <tr key={key}>
-            <td>{key}</td>
-            <td>{value}</td>
+                <td>{key}</td>
+                <td>{value}</td>
             </tr>
         ));
 
         // Render the table
         return (
             <div className="nes-table-responsive">
-            <table className="nes-table is-bordered is-centered">
-                <tbody>{rows}</tbody>
-            </table>
+                <table className="nes-table is-bordered is-centered">
+                    <tbody>{rows}</tbody>
+                </table>
             </div>
         );
     }
 
     const generateItemsTable = () => {
-        if(playerItems === "" || playerItems === null) {
+        if (playerItems === "" || playerItems === null) {
             return (<></>);
         }
 
         // Generate table rows
         const rows = playerItems.map((item, index) => (
             <tr key={index}>
-              <td>{item}</td>
+                <td>{item}</td>
             </tr>
         ));
 
         // Render the table
         return (
             <div className="nes-table-responsive">
-            <table className="nes-table is-bordered is-centered">
-                <tbody>{rows}</tbody>
-            </table>
+                <table className="nes-table is-bordered is-centered">
+                    <tbody>{rows}</tbody>
+                </table>
             </div>
         );
     }
@@ -281,14 +285,14 @@ function App() {
                 }
 
                 addMsg("Building the world...", "ai");
-                
+
                 try {
                     let resp = await fetch(apiURL, post_data);
 
                     let respJSON = await resp.json();
-                    if(resp.status === 400) {
+                    if (resp.status === 400) {
                         console.log(respJSON["error"], respJSON["type"]);
-                        if(respJSON["type"] === 0) {
+                        if (respJSON["type"] === 0) {
                             window.location.href = "/";
                         }
                     }
@@ -298,7 +302,7 @@ function App() {
 
                     let ai_resp = respJSON["ai"];
                     ai_resp = ai_resp.replace(/\n/g, "<br />");
-                        
+
                     if (respJSON["error"] === "") {
                         addMsg(ai_resp, "ai");
                         setViewPNG(
@@ -322,7 +326,7 @@ function App() {
                             setPlayerItems(respJSON["player_items"]);
                         }
                     }
-                    
+
                     // set sessions id
                     localStorage.setItem("gdmsess", respJSON["session_id"]);
 
@@ -333,7 +337,7 @@ function App() {
                 } catch (error) {
                     console.error("rag error: ", error);
                 }
-            } else if(userSessionID !== undefined) {
+            } else if (userSessionID !== undefined) {
 
             }
         }
@@ -345,7 +349,7 @@ function App() {
 
         const randomIndex = Math.floor(Math.random() * backgroundImages.length);
         const selectedBackground = backgroundImages[randomIndex];
-    
+
         const rootElement = document.getElementById('root');
         rootElement.style.backgroundImage = `url(${selectedBackground})`;
         rootElement.style.backgroundRepeat = 'no-repeat';
@@ -383,9 +387,9 @@ function App() {
                     <p>🍵 <a href="https://ko-fi.com/geminidungeon" target="_blank" rel="noreferrer">Buy me a kofi</a> 🍵</p>
                 </ModalBody>
                 <ModalFooter>
-                <Button color="primary" onClick={imToggle}>
-                    Play
-                </Button>
+                    <Button color="primary" onClick={imToggle}>
+                        Play
+                    </Button>
                 </ModalFooter>
             </Modal>
             <div className="side-menu-container">
@@ -396,9 +400,25 @@ function App() {
                     >
                         <FontAwesomeIcon icon={faInfoCircle} />
                     </button>
-                    
+
                     <div className="menu-content">
                         <div className="menu-content">
+                            <span className="content-title">Current LLM</span>
+                            <select
+                                className="form-select form-select-sm"
+                                aria-label=".form-select-sm"
+                                value={selectedModel}
+                                onChange={handleModelChange}
+                            >
+                                <option value="gpt-4o">gpt-4o</option>
+                                <option value="gemini pro" disabled>gemini pro</option>
+                                <option value="llama3-8B" disabled>llama3-8B</option>
+                                <option value="mixtral-7x8B" disabled>mixtral-7x8b</option>
+                                <option value="grok" disabled>
+                                    grok
+                                </option>
+                            </select>
+                            <br />
                             <div className="seContainer nes-container is-rounded is-dark with-title">
                                 <p className="title">Session ID</p>
                                 <p>{localStorage.getItem("gdmsess")}</p>
@@ -418,7 +438,7 @@ function App() {
             </Row>
             <Row className="chat-row">
                 <Col xs={12} className="chatbox-container">
-                    
+
                     <div id="chatbox" ref={chatboxRef}>
                         {chatHistory}
                     </div>

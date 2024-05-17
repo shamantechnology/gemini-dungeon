@@ -123,8 +123,8 @@ body {
 .side-menu-container {
   font-family: "Press Start 2P", system-ui;
   font-style: normal;
-  font-size: 9.8pt;
-  line-height: 23px;
+  font-size: 10.5pt;
+  line-height: 20px;
 }
 
 /* .ai-chat-container>.message {
@@ -524,10 +524,6 @@ body {
     height: 30px;
   }
 
-  .ai-chat-container {
-    font-size: 8pt;
-  }
-
   #user-msg-content {
     height: 20px;
   }
@@ -552,7 +548,7 @@ body {
   cursor: pointer;
   font-size: 24px;
   padding: 8px;
-  z-index: 100;
+  z-index: 99999999999;
   transition: left 0.3s ease-in-out;
 }
 
