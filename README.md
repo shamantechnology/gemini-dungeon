@@ -1,4 +1,4 @@
-# Gemini Maze
+# Gemini Dungeon
 ## React based Front End
 
 See API for more information
